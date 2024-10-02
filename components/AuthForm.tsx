@@ -22,12 +22,14 @@ import {authFormSchema} from "@/lib/utils";
 import {Loader2} from "lucide-react";
 import SignUp from "@/app/(auth)/sign-up/page";
 import {useRouter} from "next/navigation";
-import {signIn, signUp} from "@/lib/actions/user.actions";
+import {getLoggedInUser, signIn, signUp} from "@/lib/actions/user.actions";
 
 const AuthForm = ({type}: { type: string; }) => {
+    const router = useRouter();
+
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(false)
-    const router = useRouter();
+    const loggedInUser = getLoggedInUser();
 
     const formSchema = authFormSchema(type)
 
