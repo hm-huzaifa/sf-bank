@@ -19,10 +19,17 @@ export const signIn = async ({email, password}: signInProps) => {
 
 export const signUp = async (userData: SignUpParams) => {
     const {email, password, firstName, lastName} = userData;
+
     try {
         const {account} = await createAdminClient();
 
-        const newUserAccount = await account.create(ID.unique(), email, password, firstName);
+        const newUserAccount = await account.create(
+            ID.unique(),
+            email,
+            password,
+            `${firstName} ${lastName}`
+        );
+
         const session = await account.createEmailPasswordSession(email, password);
 
         cookies().set("appwrite-session", session.secret, {
@@ -31,11 +38,10 @@ export const signUp = async (userData: SignUpParams) => {
             sameSite: "strict",
             secure: true,
         });
-        return parseStringify(newUserAccount);
 
-        // Mutation / Database / Make fetch
+        return parseStringify(newUserAccount);
     } catch (error) {
-        console.error(error)
+        console.error('Error', error);
     }
 }
 
@@ -43,7 +49,20 @@ export async function getLoggedInUser() {
     try {
         const {account} = await createSessionClient();
         const user = await account.get();
+        console.log("user: ", user);
         return parseStringify(user);
+    } catch (error) {
+        return null;
+    }
+}
+
+export const logoutAccount = async () => {
+    try {
+        const {account} = await createSessionClient();
+
+        cookies().delete('appwrite-session');
+
+        await account.deleteSession('current')
     } catch (error) {
         return null;
     }
